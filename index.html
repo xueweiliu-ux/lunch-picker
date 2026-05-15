@@ -8,14 +8,30 @@
         @charset "UTF-8";
         :root { 
             --m-blue: #91ADCF; --m-purple: #B8A6D9; --m-green: #A3B18A;   
-            --m-cream: #FFF9F0; --m-gray: #7F8C8D; --bg: #F4F7F9; --text-main: #455A64;
+            --m-cream: #FFF9F0; 
+            --m-gray: #7F8C8D; --bg: #F4F7F9; --text-main: #455A64;
+            --dice-text: #546E7A;
+            --btn-edit: #607D8B;
+            --btn-del: #E57373;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: var(--text-main); font-family: -apple-system, "PingFang SC", sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
-        .container { background: #FFFFFF; border-radius: 24px; padding: 25px 30px; width: 100%; max-width: 780px; box-shadow: 0 10px 40px rgba(145, 173, 207, 0.1); }
-        
-        /* 标题更新 */
+        .container { background: #FFFFFF; border-radius: 24px; padding: 25px 30px; width: 100%; max-width: 1000px; box-shadow: 0 10px 40px rgba(145, 173, 207, 0.1); position: relative; }
         h2 { color: var(--m-blue); margin: 0 0 20px 0; font-size: 22px; font-weight: 600; text-align: center; letter-spacing: 2px; }
+
+        /* 自定义确认删除框 */
+        #custom-confirm {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; border: 1.5px solid var(--m-blue); border-radius: 16px;
+            padding: 20px 30px; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            align-items: center; flex-direction: column; gap: 15px; animation: zoomIn 0.2s ease;
+        }
+        @keyframes zoomIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+        #custom-confirm span { font-size: 15px; font-weight: 600; color: var(--text-main); }
+        .confirm-btns { display: flex; gap: 10px; }
+        .confirm-btns button { padding: 8px 20px; border-radius: 8px; border: none; font-size: 13px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-yes { background: var(--m-blue); color: white; }
+        .btn-no { background: #EEE; color: var(--m-gray); }
 
         #display-area { 
             background: var(--m-cream); border: 1.5px solid #F0E6D6; margin-bottom: 25px; 
@@ -25,14 +41,20 @@
         .res { font-size: 24px; color: var(--m-green); font-weight: 700; margin-bottom: 6px; }
         .sub-res { font-size: 13px; color: var(--m-gray); line-height: 1.5; }
         .res-detail { font-size: 12px; color: var(--m-gray); margin-top: 4px; }
-        .tag-active { background: #E8F5E9; padding: 2px 10px; border-radius: 6px; color: var(--m-green); display: inline-block; margin-top: 6px; font-size: 11px; border: 1px solid var(--m-green); }
+        
+        .tag-active { 
+            position: absolute; top: 8px; right: 8px;
+            background: #E8F5E9; padding: 1px 6px; border-radius: 5px; 
+            color: var(--m-green); font-size: 9px; border: 1px solid var(--m-green); 
+            font-weight: 600;
+        }
 
         .interaction-zone { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
         .p-panel { border: 1.5px solid #D6E0EA; padding: 18px; border-radius: 16px; text-align: center; background: #FFF; transition: 0.3s; }
         .p-panel.locked { border-color: var(--m-blue); background: #F8FBFF; }
-        .p-title { font-size: 11px; font-weight: 600; margin-bottom: 12px; color: #ABB7C4; }
-        .dice-view { font-size: 38px; height: 45px; line-height: 45px; margin-bottom: 12px; color: #E0E7EE; }
-        .p-panel.locked .dice-view { color: var(--m-blue); }
+        
+        .dice-view { font-size: 38px; height: 45px; line-height: 45px; margin-bottom: 12px; color: #E0E7EE; font-weight: 700; }
+        .p-panel.locked .dice-view { color: var(--dice-text); }
 
         .energy-btn { background: transparent; border: 1.2px solid var(--m-blue); color: var(--m-blue); padding: 7px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .energy-btn:hover:not(:disabled) { background: var(--m-blue); color: white; }
@@ -43,13 +65,33 @@
         .btn-decode { background: var(--m-blue); }
         .btn-decode:disabled { background: #E0E0E0; color: #A0A0A0; cursor: not-allowed; }
 
-        .menu-title { font-size: 15px; font-weight: 600; margin: 15px 0 10px; color: #78909C; }
-        .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; max-height: 280px; overflow-y: auto; padding: 4px; }
-        .item { background: #FDFDFD; border: 1px solid #EDF1F5; border-radius: 16px; padding: 14px; transition: 0.2s; }
-        .shop-name { font-size: 15px; font-weight: 600; color: #546E7A; margin-bottom: 4px; }
-        .shop-meta { font-size: 12px; color: #90A4AE; line-height: 1.6; }
-        .item-btn-group { display: flex; gap: 8px; margin-top: 10px; }
-        .item-btn-group button { flex: 1; padding: 5px 0; font-size: 11px; background: transparent; border-radius: 8px; border: 1px solid #ECEFF1; color: #90A4AE; cursor: pointer; }
+        .list-header { display: flex; justify-content: space-between; align-items: center; margin: 15px 0 10px; }
+        .menu-title { font-size: 15px; font-weight: 600; color: #78909C; }
+        .filter-zone { font-size: 12px; color: var(--m-gray); display: flex; align-items: center; gap: 5px; cursor: pointer; }
+
+        /* 这里改成了一行四个 (4列) */
+        .list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-height: 400px; overflow-y: auto; padding: 4px; }
+        
+        .item { 
+            background: var(--m-cream); border: 1.5px solid #EEDFCA; border-radius: 16px; 
+            padding: 12px; transition: 0.2s; position: relative;
+            display: flex; flex-direction: column; justify-content: space-between;
+            min-height: 150px;
+        }
+        .item:hover { border-color: var(--m-blue); transform: translateY(-2px); }
+        .shop-name { font-size: 14px; font-weight: 700; color: #546E7A; margin-bottom: 4px; padding-right: 35px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .shop-meta { font-size: 10px; color: #90A4AE; line-height: 1.4; }
+        
+        .item-btn-group { display: flex; gap: 4px; margin-top: auto; padding-top: 10px; }
+        .item-btn-group button { 
+            flex: 1; padding: 5px 0; font-size: 10px; font-weight: 700; 
+            background: #FFF; border-radius: 6px; border: 1px solid #EEDFCA; 
+            cursor: pointer; transition: 0.2s;
+        }
+        .btn-edit-trigger { color: var(--btn-edit) !important; border-color: #CFD8DC !important; }
+        .btn-edit-trigger:hover { background: #F4F7F9 !important; border-color: var(--btn-edit) !important; }
+        .btn-del-trigger { color: var(--btn-del) !important; border-color: #F8D7DA !important; }
+        .btn-del-trigger:hover { background: #FFF5F5 !important; border-color: var(--btn-del) !important; }
 
         .add-zone { margin-top: 25px; padding: 18px; background: #F8FAFB; border-radius: 18px; border: 1.2px dashed #D6E0EA; }
         .add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -57,43 +99,54 @@
         .btn-add { background: var(--m-blue); color: white; border: none; padding: 10px; border-radius: 8px; margin-top: 10px; width: 100%; font-weight: 600; font-size: 13px; cursor: pointer; }
         
         .pulse { animation: pulse 1.8s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 70% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(145, 173, 207, 0); } 100% { transform: scale(1); } }
+        @keyframes pulse { 0% { transform: scale(1); } 70% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+        /* 窄屏适配：如果屏幕太窄，自动切回两列 */
+        @media (max-width: 768px) {
+            .list { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <div id="custom-confirm">
+            <span>确认移除该餐厅？</span>
+            <div class="confirm-btns">
+                <button class="btn-yes" id="confirm-yes">确认</button>
+                <button class="btn-no" id="confirm-no">取消</button>
+            </div>
+        </div>
+
         <h2>✨ 光启吃点啥</h2>
-                
         <div id="display-area">
             <div id="res" class="res">READY</div>
-            <div id="sub-res" class="sub-res">快捷键：A [P1 能量] · L [P2 能量] · Enter [执行解密]</div>
+            <div id="sub-res" class="sub-res">快捷键：A [P1] · L [P2] · Enter [合体启动]</div>
         </div>
 
         <div class="interaction-zone">
             <div class="p-panel" id="p1-card">
-                <div class="p-title">OPERATOR 01 (P1) [ A ]</div>
                 <div class="dice-view" id="p1-dice">❓</div>
                 <button class="energy-btn" id="p1-btn" onclick="lockPlayer(1)">注入 P1 能量</button>
             </div>
             <div class="p-panel" id="p2-card">
-                <div class="p-title">OPERATOR 02 (P2) [ L ]</div>
                 <div class="dice-view" id="p2-dice">❓</div>
                 <button class="energy-btn" id="p2-btn" onclick="lockPlayer(2)" disabled>注入 P2 能量</button>
             </div>
         </div>
 
         <div class="control-panel">
-            <button class="btn-random" id="lucky-btn" onclick="luckyDraw()">终端强制随机</button>
-            <button class="btn-decode" id="final-combine-btn" onclick="executeSumLogic()" disabled>执行双轴合数解密</button>
+            <button class="btn-random" id="lucky-btn" onclick="luckyDraw()">🌀 灵感突袭</button>
+            <button class="btn-decode" id="final-combine-btn" onclick="executeSumLogic()" disabled>🔥 能量合体：启动！</button>
         </div>
 
-        <div class="menu-title">🍱 候选池</div>
-        <div style="text-align:right; margin-bottom:8px;">
-            <input type="checkbox" id="filterOnlyMei" onchange="show()"> 
-            <label for="filterOnlyMei" style="font-size:12px; color:var(--m-gray); cursor:pointer;"> 只显示美餐卡</label>
+        <div class="list-header">
+            <div class="menu-title">🍱 候选池</div>
+            <label class="filter-zone">
+                <input type="checkbox" id="meican-filter" onchange="show()"> 只显示美餐卡
+            </label>
         </div>
-        <div class="list" id="list"></div>
+        <div id="list" class="list"></div>
 
         <div class="add-zone">
             <div class="add-grid">
@@ -101,39 +154,76 @@
                 <input id="add-dish" placeholder="特色菜">
                 <input id="add-price" type="number" placeholder="均价 (¥)">
                 <input id="add-cal" type="number" placeholder="热量 (kcal)">
-                <div style="display:flex; align-items:center; gap:5px; font-size:12px; color:var(--m-gray);">
-                    <input type="checkbox" id="add-meican" style="width:auto;"> 美餐卡
+                <div style="display:flex; align-items:center; gap:5px; font-size:12px;">
+                    <input type="checkbox" id="add-meican"> 美餐卡
                 </div>
-                <button class="btn-add" style="grid-column: span 2;" onclick="addNewShop()">确认添加</button>
+                <button class="btn-add" id="save-btn" style="grid-column: span 2;" onclick="addNewShop()">确认添加/保存修改</button>
             </div>
         </div>
     </div>
 
 <script>
-    let shop = [
+    let defaultShops = [
         { name: "长者食堂", dish: "招牌红烧肉", price: 20, meican: true, cal: 650 },
         { name: "阿塞", dish: "爆辣炒码面", price: 28, meican: false, cal: 720 },
         { name: "阿莲家", dish: "酸菜卤肉饭", price: 25, meican: true, cal: 580 },
         { name: "万利记", dish: "老长沙米粉", price: 22, meican: true, cal: 510 }
     ];
+    
+    let shop = JSON.parse(localStorage.getItem('myLunchData')) || defaultShops;
     let p1Value = null, p2Value = null;
+    let editIndex = -1;
+    let deletePendingIndex = -1;
+
+    function saveToLocal() { localStorage.setItem('myLunchData', JSON.stringify(shop)); }
 
     function show() {
         let html = "";
-        const onlyMei = document.getElementById("filterOnlyMei").checked;
+        let isMeicanOnly = document.getElementById('meican-filter').checked;
         shop.forEach((item, i) => {
-            if(onlyMei && !item.meican) return;
-            let meicanTag = item.meican ? '<span class="mc-badge tag-active">美餐卡 OK</span>' : '<span class="mc-badge tag-active" style="background:#eee; color:#999; border:none;">不支持</span>';
-            html += `<div class="item"><input type="checkbox" checked id="c${i}" style="margin-bottom:8px;"><div class="shop-name">${item.name}</div><div class="shop-meta">✨ 必点：${item.dish}</div><div class="shop-meta">￥${item.price || '?'} | ${item.cal || '?'} kcal</div><div>${meicanTag}</div><div class="item-btn-group"><button onclick="delItem(${i})">删除</button></div></div>`;
+            if (isMeicanOnly && !item.meican) return;
+            let meicanTag = item.meican ? '<span class="tag-active">美餐卡 OK</span>' : '';
+            html += `<div class="item">
+                ${meicanTag}
+                <div>
+                    <input type="checkbox" checked id="c${i}" style="margin-bottom:8px;">
+                    <div class="shop-name" title="${item.name}">${item.name}</div>
+                    <div class="shop-meta">✨：${item.dish}</div>
+                    <div class="shop-meta">￥${item.price || '?'} | ${item.cal || '?'} kcal</div>
+                </div>
+                <div class="item-btn-group">
+                    <button class="btn-edit-trigger" onclick="editItem(${i})">EDIT</button>
+                    <button class="btn-del-trigger" onclick="delItemTrigger(${i})">DELETE</button>
+                </div>
+            </div>`;
         });
         document.getElementById("list").innerHTML = html;
+        saveToLocal();
+    }
+
+    function delItemTrigger(idx) {
+        deletePendingIndex = idx;
+        document.getElementById('custom-confirm').style.display = 'flex';
+    }
+
+    document.getElementById('confirm-yes').onclick = function() {
+        if (deletePendingIndex !== -1) {
+            shop.splice(deletePendingIndex, 1);
+            deletePendingIndex = -1;
+            document.getElementById('custom-confirm').style.display = 'none';
+            show();
+        }
+    }
+
+    document.getElementById('confirm-no').onclick = function() {
+        deletePendingIndex = -1;
+        document.getElementById('custom-confirm').style.display = 'none';
     }
 
     function lockPlayer(num) {
         const emojis = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
         let btn = document.getElementById("p" + num + "-btn"), view = document.getElementById("p" + num + "-dice"), card = document.getElementById("p" + num + "-card");
         btn.disabled = true; card.classList.add("locked");
-        
         let count = 0;
         let timer = setInterval(() => {
             view.innerText = emojis[Math.floor(Math.random() * 6)];
@@ -142,32 +232,25 @@
                 let final = Math.floor(Math.random() * 6) + 1;
                 view.innerText = emojis[final-1] + ` (${final})`;
                 if(num === 1) { 
-                    p1Value = final; 
-                    document.getElementById("p2-btn").disabled = false; 
+                    p1Value = final; document.getElementById("p2-btn").disabled = false; 
                     document.getElementById("res").innerText = ""; 
-                    document.getElementById("sub-res").innerText = "P1 能量已就绪，等待 P2 注入..."; 
+                    document.getElementById("sub-res").innerText = "P1 已就绪，等待 P2 注入..."; 
                 } else { 
-                    p2Value = final; 
-                    document.getElementById("final-combine-btn").disabled = false; 
+                    p2Value = final; document.getElementById("final-combine-btn").disabled = false; 
                     document.getElementById("final-combine-btn").classList.add("pulse"); 
                     document.getElementById("res").innerText = ""; 
-                    document.getElementById("sub-res").innerText = "能量已满，请执行解密指令"; 
+                    document.getElementById("sub-res").innerText = "双重能量已就绪，准备合体！"; 
                 }
             }
         }, 60);
     }
 
     function formatOutput(target, info) {
-        document.getElementById("res").innerText = ">> " + target.name;
+        document.getElementById("res").innerText = "⭐ " + target.name;
         document.getElementById("sub-res").innerHTML = `
-            <div style="color:var(--m-green); font-weight:700;">解密完成</div>
-            <span style="color:var(--text-main); font-weight:600;">✨ 推荐：${target.dish}</span><br>
-            <div class="res-detail">
-                人均 ¥${target.price} | 预计 ${target.cal} kcal<br>
-                ${target.meican ? '<span class="tag-active">支持美餐卡</span>' : '<span class="tag-active" style="background:#f5f5f5; color:#999; border:none;">现金支付</span>'}<br>
-                <small style="opacity:0.6; margin-top:4px; display:block;">[ ${info} ]</small>
-            </div>
-        `;
+            <div style="color:var(--m-green); font-weight:700;">锁定今日美味</div>
+            <span style="color:var(--text-main); font-weight:600;">😋 特色：${target.dish}</span><br>
+            <div class="res-detail">¥${target.price} | ${target.cal} kcal | [ ${info} ]</div>`;
     }
 
     function executeSumLogic() {
@@ -179,12 +262,9 @@
         let target = arr[sum % arr.length];
         let count = 0;
         let timer = setInterval(() => {
-            document.getElementById("res").innerText = "DECRYPTING: " + Math.random().toString(36).substring(7).toUpperCase();
-            if(++count > 15) {
-                clearInterval(timer);
-                formatOutput(target, `合数算法: ${p1Value}+${p2Value}=${sum}`);
-                setTimeout(resetInteraction, 8000);
-            }
+            document.getElementById("res").innerText = "COSMIC ENERGY: " + Math.random().toString(36).substring(7).toUpperCase();
+            document.getElementById("sub-res").innerText = "双重能量共振中...";
+            if(++count > 18) { clearInterval(timer); formatOutput(target, `合体数值: ${sum}`); setTimeout(resetInteraction, 8000); }
         }, 80);
     }
 
@@ -192,18 +272,37 @@
         let arr = getAvailable();
         if(!arr.length) return;
         let luckyBtn = document.getElementById("lucky-btn");
-        luckyBtn.disabled = true;
-        resetInteraction();
+        luckyBtn.disabled = true; resetInteraction();
         let target = arr[Math.floor(Math.random() * arr.length)];
         let count = 0;
         let timer = setInterval(() => {
-            document.getElementById("res").innerText = "RANDOMIZING: " + Math.random().toString(36).substring(7).toUpperCase();
-            if(++count > 15) {
-                clearInterval(timer);
-                formatOutput(target, "强制随机抽选");
-                luckyBtn.disabled = false;
-            }
+            document.getElementById("res").innerText = "SEARCHING: " + Math.random().toString(36).substring(7).toUpperCase();
+            document.getElementById("sub-res").innerText = "灵感正在飞速掠过...";
+            if(++count > 15) { clearInterval(timer); formatOutput(target, "灵感突袭"); luckyBtn.disabled = false; }
         }, 80);
+    }
+
+    function editItem(idx) {
+        let item = shop[idx];
+        document.getElementById("add-name").value = item.name;
+        document.getElementById("add-dish").value = item.dish;
+        document.getElementById("add-price").value = item.price;
+        document.getElementById("add-cal").value = item.cal;
+        document.getElementById("add-meican").checked = item.meican;
+        editIndex = idx;
+        document.getElementById("save-btn").innerText = "保存修改";
+        document.getElementById("add-name").scrollIntoView({behavior: "smooth"});
+    }
+
+    function addNewShop() {
+        let name = document.getElementById("add-name").value.trim();
+        if(!name) return;
+        let data = { name: name, dish: document.getElementById("add-dish").value || "未填写", price: document.getElementById("add-price").value || 0, cal: document.getElementById("add-cal").value || 0, meican: document.getElementById("add-meican").checked };
+        if(editIndex > -1) { shop[editIndex] = data; editIndex = -1; document.getElementById("save-btn").innerText = "确认添加"; }
+        else { shop.push(data); }
+        ["add-name", "add-dish", "add-price", "add-cal"].forEach(id => document.getElementById(id).value = "");
+        document.getElementById("add-meican").checked = false;
+        show();
     }
 
     function resetInteraction() {
@@ -214,7 +313,7 @@
         document.querySelectorAll(".p-panel").forEach(p => p.classList.remove("locked"));
         document.querySelectorAll(".dice-view").forEach(v => v.innerText = "❓");
         document.getElementById("res").innerText = "READY";
-        document.getElementById("sub-res").innerText = "快捷键：A [P1 能量] · L [P2 能量] · Enter [执行解密]";
+        document.getElementById("sub-res").innerText = "快捷键：A [P1] · L [P2] · Enter [合体启动]";
     }
 
     function getAvailable() {
@@ -222,13 +321,7 @@
         shop.forEach((s, i) => { if(document.getElementById("c"+i).checked) a.push(s); });
         return a;
     }
-    function addNewShop() {
-        let name = document.getElementById("add-name").value.trim();
-        if(!name) return;
-        shop.push({ name: name, dish: document.getElementById("add-dish").value.trim() || "神秘美食", price: document.getElementById("add-price").value || 0, cal: document.getElementById("add-cal").value || 0, meican: document.getElementById("add-meican").checked });
-        document.getElementById("add-name").value = ""; show();
-    }
-    function delItem(idx){ if(confirm("确认移除？")){ shop.splice(idx,1); show(); } }
+
     window.addEventListener("keydown", (e) => {
         if ((e.key === "a" || e.key === "A") && !document.getElementById("p1-btn").disabled) lockPlayer(1);
         if ((e.key === "l" || e.key === "L") && !document.getElementById("p2-btn").disabled) lockPlayer(2);

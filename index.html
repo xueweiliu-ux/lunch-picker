@@ -161,7 +161,7 @@
 <script>
     // ==================== 【Supabase 配置区域】 ====================
     const SUPABASE_URL = 'https://shqabcrgncrtatrqkooy.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_I30if_8h5G1XyadhSqTCXQ_c2YDhXtT';
+    const SUPABASE_ANON_KEY = 'sb_publishable_I3Oif_8h5G1XyadhSqTCXQ_c2YDhXtT'; // 🌟 已经修正了 O 和 0 的拼写错误！
     
     // 初始化客户端
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -219,10 +219,11 @@
         shop.forEach((item, i) => {
             if (isMeicanOnly && !item.meican) return;
             let meicanTag = item.meican ? '<span class="tag-active">美餐卡 OK</span>' : '';
+            // 🌟 核心修正：复选框 id 采用强绑定的 c-${item.id} 代替顺序索引 c${i}，彻底避免隐藏数据带来的错位崩溃
             html += `<div class="item">
                 ${meicanTag}
                 <div>
-                    <input type="checkbox" checked id="c${i}" style="margin-bottom:8px;">
+                    <input type="checkbox" checked id="c-${item.id}" style="margin-bottom:8px;">
                     <div class="shop-name" title="${item.name}">${item.name}</div>
                     <div class="shop-meta">✨：${item.dish}</div>
                     <div class="shop-meta">￥${item.price || '?'} | ${item.cal || '?'} kcal</div>
@@ -340,7 +341,11 @@
 
     function executeSumLogic() {
         let arr = getAvailable();
-        if (!arr.length) return;
+        if (!arr.length) {
+            alert("可抽签的池子为空，请至少勾选一家餐厅！");
+            resetInteraction();
+            return;
+        }
         document.getElementById("final-combine-btn").disabled = true;
         document.getElementById("final-combine-btn").classList.remove("pulse");
         let sum = p1Value + p2Value;
@@ -355,7 +360,10 @@
 
     function luckyDraw() {
         let arr = getAvailable();
-        if(!arr.length) return;
+        if(!arr.length) {
+            alert("可抽签的池子为空，请至少勾选一家餐厅！");
+            return;
+        }
         let luckyBtn = document.getElementById("lucky-btn");
         luckyBtn.disabled = true; resetInteraction();
         let target = arr[Math.floor(Math.random() * arr.length)];
@@ -378,15 +386,17 @@
         document.getElementById("sub-res").innerText = "快捷键：A [P1] · L [P2] · Enter [合体启动]";
     }
 
-function getAvailable() {
+    // 🌟 终极强健版过滤算法：精准联动安全防御机制
+    function getAvailable() {
         let a = [];
         let isMeicanOnly = document.getElementById('meican-filter').checked;
-        shop.forEach((s, i) => { 
-            // 如果开启了只看美餐，且这家店不是美餐，直接跳过
+        shop.forEach((s) => { 
+            // 1. 如果开启了只看美餐，且这家店本身不是美餐，直接无视它
             if (isMeicanOnly && !s.meican) return;
             
-            // 检查对应网页上的复选框是否存在且被勾选
-            let checkBox = document.getElementById("c" + i);
+            // 2. 根据全局唯一 id 抓取复选框元素
+            let checkBox = document.getElementById("c-" + s.id);
+            // 3. 只有当它确实在页面中画出来了，而且被用户勾选了，才允许加入抽签摇号池
             if (checkBox && checkBox.checked) {
                 a.push(s);
             }

@@ -378,9 +378,19 @@
         document.getElementById("sub-res").innerText = "快捷键：A [P1] · L [P2] · Enter [合体启动]";
     }
 
-    function getAvailable() {
+function getAvailable() {
         let a = [];
-        shop.forEach((s, i) => { if(document.getElementById("c"+i).checked) a.push(s); });
+        let isMeicanOnly = document.getElementById('meican-filter').checked;
+        shop.forEach((s, i) => { 
+            // 如果开启了只看美餐，且这家店不是美餐，直接跳过
+            if (isMeicanOnly && !s.meican) return;
+            
+            // 检查对应网页上的复选框是否存在且被勾选
+            let checkBox = document.getElementById("c" + i);
+            if (checkBox && checkBox.checked) {
+                a.push(s);
+            }
+        });
         return a;
     }
 

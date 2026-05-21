@@ -282,4 +282,161 @@
             const { error } = await supabaseClient.from('Restaurant').delete().eq('id', targetId);
             if (error) console.error('删除失败:', error);
             
-            deletePending
+            deletePendingIndex = -1;
+            fetchFromCloud();
+        }
+    }
+
+    document.getElementById('confirm-no').onclick = function() {
+        deletePendingIndex = -1;
+        document.getElementById('custom-confirm').style.display = 'none';
+    }
+
+    async function addNewShop() {
+        let name = document.getElementById("add-name").value.trim();
+        if(!name) return;
+        
+        let data = { 
+            name: name, 
+            dish: document.getElementById("add-dish").value || "未填写", 
+            price: Number(document.getElementById("add-price").value) || 0, 
+            cal: Number(document.getElementById("add-cal").value) || 0, 
+            meican: document.getElementById("add-meican").checked 
+        };
+
+        document.getElementById("res").innerText = "SAVING...";
+
+        if(editIndex > -1) {
+            const { error } = await supabaseClient.from('Restaurant').update(data).eq('id', shop[editIndex].id);
+            if (error) console.error('更新失败:', error);
+            editIndex = -1; 
+            document.getElementById("save-btn").innerText = "确认添加/保存修改"; 
+        } else {
+            const { error } = await supabaseClient.from('Restaurant').insert([data]);
+            if (error) console.error('插入失败:', error);
+        }
+        
+        ["add-name", "add-dish", "add-price", "add-cal"].forEach(id => document.getElementById(id).value = "");
+        document.getElementById("add-meican").checked = false;
+        fetchFromCloud();
+    }
+
+    function editItem(event, idx) {
+        if(event) event.stopPropagation();
+        let item = shop[idx];
+        document.getElementById("add-name").value = item.name;
+        document.getElementById("add-dish").value = item.dish;
+        document.getElementById("add-price").value = item.price;
+        document.getElementById("add-cal").value = item.cal;
+        document.getElementById("add-meican").checked = item.meican;
+        editIndex = idx;
+        document.getElementById("save-btn").innerText = "保存修改";
+        document.getElementById("add-name").scrollIntoView({behavior: "smooth"});
+    }
+
+    // ==================== 【摇号互动逻辑】 ====================
+    function lockPlayer(num) {
+        const emojis = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+        let btn = document.getElementById("p" + num + "-btn"), view = document.getElementById("p" + num + "-dice"), card = document.getElementById("p" + num + "-card");
+        btn.disabled = true; card.classList.add("locked");
+        let count = 0;
+        let timer = setInterval(() => {
+            view.innerText = emojis[Math.floor(Math.random() * 6)];
+            if (++count > 12) {
+                clearInterval(timer);
+                let final = Math.floor(Math.random() * 6) + 1;
+                view.innerText = emojis[final-1] + ` (${final})`;
+                // 🚀 这里也改成了 Player 1 / Player 2 提示
+                if(num === 1) { 
+                    p1Value = final; document.getElementById("p2-btn").disabled = false; 
+                    document.getElementById("res").innerText = ""; 
+                    document.getElementById("sub-res").innerText = "Player 1 已就绪，等待 Player 2 注入..."; 
+                } else { 
+                    p2Value = final; document.getElementById("final-combine-btn").disabled = false; 
+                    document.getElementById("final-combine-btn").classList.add("pulse"); 
+                    document.getElementById("res").innerText = ""; 
+                    document.getElementById("sub-res").innerText = "双重能量已就绪，准备合体！"; 
+                }
+            }
+        }, 60);
+    }
+
+    function formatOutput(target, info) {
+        document.getElementById("res").innerText = "⭐ " + target.name;
+        document.getElementById("sub-res").innerHTML = `
+            <div style="color:var(--m-green); font-weight:700;">锁定今日美味</div>
+            <span style="color:var(--text-main); font-weight:600;">😋 特色：${target.dish}</span><br>
+            <div class="res-detail">¥${target.price} | ${target.cal} kcal | [ ${info} ]</div>`;
+    }
+
+    function executeSumLogic() {
+        let arr = getAvailable();
+        if (!arr.length) {
+            alert("可抽签的池子为空，请至少勾选一家餐厅！");
+            resetInteraction();
+            return;
+        }
+        document.getElementById("final-combine-btn").disabled = true;
+        document.getElementById("final-combine-btn").classList.remove("pulse");
+        let sum = p1Value + p2Value;
+        let target = arr[sum % arr.length];
+        let count = 0;
+        let timer = setInterval(() => {
+            document.getElementById("res").innerText = "COSMIC ENERGY: " + Math.random().toString(36).substring(7).toUpperCase();
+            document.getElementById("sub-res").innerText = "双重能量共振中...";
+            if(++count > 18) { clearInterval(timer); formatOutput(target, `合体数值: ${sum}`); setTimeout(resetInteraction, 8000); }
+        }, 80);
+    }
+
+    function luckyDraw() {
+        let arr = getAvailable();
+        if(!arr.length) {
+            alert("可抽签的池子为空，请至少勾选一家餐厅！");
+            return;
+        }
+        let luckyBtn = document.getElementById("lucky-btn");
+        luckyBtn.disabled = true; resetInteraction();
+        let target = arr[Math.floor(Math.random() * arr.length)];
+        let count = 0;
+        let timer = setInterval(() => {
+            document.getElementById("res").innerText = "SEARCHING: " + Math.random().toString(36).substring(7).toUpperCase();
+            document.getElementById("sub-res").innerText = "灵感正在飞速掠过...";
+            if(++count > 15) { clearInterval(timer); formatOutput(target, "灵感突袭"); luckyBtn.disabled = false; }
+        }, 80);
+    }
+
+    function resetInteraction() {
+        p1Value = null; p2Value = null;
+        document.getElementById("p1-btn").disabled = false;
+        document.getElementById("p2-btn").disabled = true;
+        document.getElementById("final-combine-btn").disabled = true;
+        document.querySelectorAll(".p-panel").forEach(p => p.classList.remove("locked"));
+        document.querySelectorAll(".dice-view").forEach(v => v.innerText = "❓");
+        document.getElementById("res").innerText = "READY";
+        // 🚀 重置提示也同步更新
+        document.getElementById("sub-res").innerText = "快捷键：A [Player 1] · L [Player 2] · Enter [合体启动]";
+    }
+
+    function getAvailable() {
+        let a = [];
+        let isMeicanOnly = document.getElementById('meican-filter').checked;
+        shop.forEach((s) => { 
+            if (isMeicanOnly && !s.meican) return;
+            let checkBox = document.getElementById("c-" + s.id);
+            if (checkBox && checkBox.checked) {
+                a.push(s);
+            }
+        });
+        return a;
+    }
+
+    window.addEventListener("keydown", (e) => {
+        if ((e.key === "a" || e.key === "A") && !document.getElementById("p1-btn").disabled) lockPlayer(1);
+        if ((e.key === "l" || e.key === "L") && !document.getElementById("p2-btn").disabled) lockPlayer(2);
+        if (e.key === "Enter" && !document.getElementById("final-combine-btn").disabled) executeSumLogic();
+    });
+
+    fetchFromCloud();
+</script>
+</body>
+</html>
